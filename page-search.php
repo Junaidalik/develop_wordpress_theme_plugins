@@ -6,49 +6,81 @@ $terms = get_terms( array(
   'taxonomy' => 'type',
   'hide_empty' => false,
 ));
-
-$propert_type = "";
-if(isset($_GET['property_type'])) {
-$propert_type  = array(
+// echo "<pre>"; print_r($terms); echo "</pre>";
+//   exit();
+$property_type="";
+if(isset($_GET['property_type'])){
+$property_type  = array(
     'taxonomy' => 'type',
     'field'    => 'slug',
     'terms'    => array($_GET['property_type']),
 );
+
 }
-$slider_range="";
-if(isset($_GET['pieces'])){
+$property_currency="";
+if(isset($_GET['property_currency'])){
+$property_currency  = array(
+    'taxonomy' => 'currency',
+    'field'    => 'slug',
+    'terms'    => array($_GET['property_currency']),
+);
+}
+$property_features="";
+if(isset($_GET['property_features']))
+$property_features  = array(
+    'taxonomy' => 'features',
+    'field'    => 'slug',
+    'terms'    => array($_GET['property_features']),
+);
+
+  
+$slider_range = "";
+  if(isset($_GET['pieces'][0]) && isset($_GET['pieces'][0] ))
+  {
+
     $slider_range = array(
         'key'     => '_property_price',
-        'value'   => $_GET['pieces'] ,
+        'value'   =>array($_GET['pieces'][0] , $_GET['pieces'][1]),
         'compare' => 'BETWEEN',
     );
-}
+
+  }
+
+
 $search_title ="";
 if(isset($_GET['searchpost'])){
     $search_title = $_GET['searchpost'];
 }
-
+// to change the data of page query argument
+$paged = ( get_query_var( 'paged' ) ) ? absint( get_query_var( 'paged' ) ) : 1;
 $args = array(  
   'post_type' => 'property',
   'post_status' => 'publish',
-  'posts_per_page' => 2, 
+  'posts_per_page' => 6, 
+  'paged' => $paged,
   'orderby' => 'title', 
   'order' => 'ASC',
-  'cat' => 'home',
+  //'cat' => 'home',
   's'=> $search_title,
   
-  'tax_query' => array(
+   'tax_query' => array(
     'relation' => 'AND',
-    $propert_type,
+    $property_type,
+    $property_currency,
+    $property_features,
    
   ),
     'meta_query' => array(
-        'relation' => 'AND',
 		$slider_range,
-    ),
+     ),
+    
 );
 
 $query = new WP_Query($args);
+// echo "<pre>";
+// print_r($args);
+// echo "</pre>";
+
  ?>
 
 
@@ -63,47 +95,61 @@ $query = new WP_Query($args);
                     <form  id="form_id" method="GET" action="<?php echo esc_html( get_permalink()) ?>">
                     <input type="range" name="pieces" id="inputPieces" multiple value="<?php echo  esc_html(isset($_GET['pieces'][0])? $_GET['pieces'][0]:"" )?>,<?php echo esc_html(isset($_GET['pieces'][1])? $_GET['pieces'][1]:"") ?>" min="100" max="2000" unit=" Rs." style="width: 250px">
                     <br/>
-                    <input  type="text" name="searchpost" id="searchpost" class="form-control" placeholder="Search of Properties">
+                    <input  type="text" name="searchpost" id="searchpost" value="" class="form-control" placeholder="Search of Properties">
                     <div class="row">
-                        <div class="col-lg-5">
-                            <select class="form-control">
-                                <option>Buy</option>
-                                <option>Rent</option>
-                                <option>Sale</option>
+                        <div class="col-lg-6">
+
+                            <select class="form-control" placeholder="property currency" name="property_currency">
+                              <?php 
+                              $terms = get_terms( array(
+                                'taxonomy' => 'currency',
+                                'hide_empty' => false,
+                            ));?>
+                            <option <?php echo esc_html(isset($_GET["property_currency"]) ? '':'selected' ) ?> disabled>currency</option>
+                             <?php foreach($terms as $term){ ?>
+                            <option <?php echo ((isset($_GET['property_currency']) ? $_GET['property_currency']:'') == $term->slug) ? 'selected':'' ?> value="<?php echo $term->slug?>"><?php echo $term->name ?></option>
+                                <?php } ?>
                             </select>
                         </div>
                       
-                        <div class="col-lg-7">
-                            <select class="form-control">
-                                <option>Price</option>
-                                <option>$150,000 - $200,000</option>
-                                <option>$200,000 - $250,000</option>
-                                <option>$250,000 - $300,000</option>
-                                <option>$300,000 - above</option>
+                        <div class="col-lg-6">
+                        <select class="form-control" placeholder="property features" name="property_features">
+                              <?php 
+                              $terms = get_terms( array(
+                                'taxonomy' => 'features',
+                                'hide_empty' => false,
+                            ));?>
+                            <option <?php echo esc_html(isset($_GET["property_features"]) ? '':'selected' ) ?> disabled>features</option>
+                             <?php foreach($terms as $term){ ?>
+                            <option <?php echo ((isset($_GET['property_features']) ? $_GET['property_features']:'') == $term->slug) ? 'selected':'' ?> value="<?php echo $term->slug?>"><?php echo $term->name ?></option>
+                                <?php } ?>
                             </select>
                         </div>
                     </div>
                     <div class="row">
                    
                         <div class="col-lg-12">
-                            <select class="form-control" name="property_type">
+                            <select class="form-control" placeholder="property type" name="property_type">
                               <?php 
                               $terms = get_terms( array(
                                 'taxonomy' => 'type',
                                 'hide_empty' => false,
-                            ));?>
-                            <option placeholder="property type"></option>
-                             <?php 
-                              foreach($terms as $term):
-                              ?>
-                           
-                            <option placeholder="property type"><?php echo esc_html($term->name) ?></option>
-                                <?php  endforeach; ?>
+                              ));                              
+                            ?>
+                            <option <?php echo esc_html(isset($_GET["property_type"]) ? '':'selected' ) ?> disabled>type</option>
+                             <?php foreach($terms as $term){ ?>
+                            <option <?php echo ((isset($_GET['property_type']) ? $_GET['property_type']:'') == $term->slug) ? 'selected':'' ?>  value="<?php echo $term->slug?>"><?php echo $term->name ?></option>
+                                <?php } ?>
                             </select>
                            
                            
                         </div>
                     </div>
+                    <?php
+                    //  echo "<pre>";
+                    //  print_r($terms);
+                    //  echo "</pre>";
+                    ?>
                     <button type="submit" id="butsave" class="btn btn-primary">Find Now</button>
               </form>
                 </div>
@@ -204,40 +250,38 @@ $query = new WP_Query($args);
                     <!-- properties -->
                     
                     <?php     
-                       }
-
-        echo paginate_links( array(
-	        'base' => str_replace( $args['posts_per_page'], '%#%', esc_url( get_pagenum_link( $args['posts_per_page'] ) ) ),
-	        'format' => '?paged=%#%',
-	        'current' => max( 1, get_query_var('paged') ),
-	        'total' => $query->max_num_pages
-) );
-                 
+                       }               
                   wp_reset_postdata();
                 } 
                 else
                 { ?>
                     <h1 style="color:black; margin:3em"><?php echo esc_html("post not found!!") ?></h1>;
-               <?php }
-                    ?>
+               <?php }?>
                 </div>
+                <!-- pagination start -->
+                <div class="center">
+             <?php 
+                 echo paginate_links( array(
+                        'base' => str_replace( $args['posts_per_page'],'%#%', esc_url(get_pagenum_link( $args['posts_per_page']) )  ),
+                        'format' => '?paged=%#%',
+                        'current' => max( 1, get_query_var('paged') ),
+                        'total' => $query->max_num_pages
+                ));
+
+                // echo esc_url(get_pagenum_link( $args['posts_per_page']));
+                ?>
+                </div>
+                <!-- pagination end -->
+                <!-- load more -->
+                <div class="btn__wrapper">
+                    <a href="#!" type="button" class="btn btn-info btn-lg" id="load-more">Load more</a>
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
-<?php 
 
-?>
-<div class="center">
-                        <ul class="pagination">
-                            <li><a href="#">«</a></li>
-                            <li><a href="#">1</a></li>
-                            <li><a href="#">2</a></li>
-                            <li><a href="#">3</a></li>
-                            <li><a href="#">4</a></li>
-                            <li><a href="#">5</a></li>
-                            <li><a href="#">»</a></li>
-                        </ul>
-                    </div>
+
                     
 <?php get_footer();

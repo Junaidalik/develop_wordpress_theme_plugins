@@ -41,6 +41,7 @@
 		};
 
 		Page.init();
+		
 
 		/**
 		 * Notes:
@@ -55,6 +56,8 @@
          // call the plugin's add method
          ss.add($items);
  
-         */
+        */
+
+		 
 	});
 })(jQuery);

@@ -1,3 +1,4 @@
+<!-- <script src="ajax.js"></script> -->
 <?php 
 /* Template Name: page search */
 get_header();
@@ -56,13 +57,12 @@ $paged = ( get_query_var( 'paged' ) ) ? absint( get_query_var( 'paged' ) ) : 1;
 $args = array(  
   'post_type' => 'property',
   'post_status' => 'publish',
-  'posts_per_page' => 6, 
+  'posts_per_page' => 3, 
   'paged' => $paged,
   'orderby' => 'title', 
   'order' => 'ASC',
   //'cat' => 'home',
   's'=> $search_title,
-  
    'tax_query' => array(
     'relation' => 'AND',
     $property_type,
@@ -76,7 +76,9 @@ $args = array(
     
 );
 
-$query = new WP_Query($args);
+// $query = new WP_Query($args);
+
+
 // echo "<pre>";
 // print_r($args);
 // echo "</pre>";
@@ -92,7 +94,12 @@ $query = new WP_Query($args);
 
                 <div class="search-form">
                     <h4><span class="glyphicon glyphicon-search"></span> Search for</h4><br/>                 
-                    <form  id="form_id" method="GET" action="<?php echo esc_html( get_permalink()) ?>">
+                    <form  id="form_id" name="form_data" method="GET" action="<?php echo esc_html( get_permalink()) ?>">
+
+                     
+                     <input type="hidden" id="page_no" name="page_no" value="1" />
+                     
+                     
                     <input type="range" name="pieces" id="inputPieces" multiple value="<?php echo  esc_html(isset($_GET['pieces'][0])? $_GET['pieces'][0]:"" )?>,<?php echo esc_html(isset($_GET['pieces'][1])? $_GET['pieces'][1]:"") ?>" min="100" max="2000" unit=" Rs." style="width: 250px">
                     <br/>
                     <input  type="text" name="searchpost" id="searchpost" value="" class="form-control" placeholder="Search of Properties">
@@ -211,62 +218,19 @@ $query = new WP_Query($args);
                     </div>
 
                 </div>
-               <div class="row">
+               <div class="row" id="properties_div">
                    <!-- properties -->
-                   <?php
-
-                    if($query->have_posts()){
-                       while($query->have_posts()){
-                       $query->the_post();
-                     
-                      $status_name = get_taxonomy_term(get_the_ID() ,'status');
-                      $curreny_name = get_taxonomy_term(get_the_ID() ,'currency');
-                      $feature_names = features_of_property(get_the_ID(),"features");
-
-                     
-                      ?>
-
-                    <div class="col-lg-4 col-sm-6">
-
                 
-                        <div class="properties">
-                            <div class="image-holder"><img src="<?php echo get_the_post_thumbnail_url()?>" class="img-responsive"
-                                    alt="properties">
-                                <div class="status sold"><?php  echo esc_html( $status_name);  ?></div>
-                            </div>
-                            <h4><a href="property-detail.php"><?php echo the_title(); ?></a></h4>
-                            <p class="price"><?php echo esc_html__('Price:','mytheme'); ?><?php echo  $curreny_name . get_post_meta( get_the_ID(), '_property_price', true); ?></p>
-                            <div class="listing-detail">
-                            <?php
-                            foreach( $feature_names as $feature_name ):
-                             $separator =explode('-',$feature_name->name);?>
-                           <span data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo esc_html( $separator[1] ) ?>"><?php echo esc_html( $separator[0]) ?></span>
-                            <?php endforeach; ?>
-                           
-                            </div>
-                            <a class="btn btn-primary" href=<?php echo esc_html( get_permalink()) ?>>View Details</a>
-                        </div>
-                    </div>
-                    <!-- properties -->
-                    
-                    <?php     
-                       }               
-                  wp_reset_postdata();
-                } 
-                else
-                { ?>
-                    <h1 style="color:black; margin:3em"><?php echo esc_html("post not found!!") ?></h1>;
-               <?php }?>
                 </div>
                 <!-- pagination start -->
                 <div class="center">
              <?php 
-                 echo paginate_links( array(
-                        'base' => str_replace( $args['posts_per_page'],'%#%', esc_url(get_pagenum_link( $args['posts_per_page']) )  ),
-                        'format' => '?paged=%#%',
-                        'current' => max( 1, get_query_var('paged') ),
-                        'total' => $query->max_num_pages
-                ));
+                //  echo paginate_links( array(
+                //         'base' => str_replace( $args['posts_per_page'],'%#%', esc_url(get_pagenum_link( $args['posts_per_page']) )  ),
+                //         'format' => '?paged=%#%',
+                //         'current' => max( 1, get_query_var('paged') ),
+                //         'total' => $query->max_num_pages
+                // ));
 
                 // echo esc_url(get_pagenum_link( $args['posts_per_page']));
                 ?>
@@ -274,7 +238,7 @@ $query = new WP_Query($args);
                 <!-- pagination end -->
                 <!-- load more -->
                 <div class="btn__wrapper">
-                    <a href="#!" type="button" class="btn btn-info btn-lg" id="load-more">Load more</a>
+                    <button class="btn btn-info btn-lg" id="load_more">Load more</button>
                 </div>
                 
             </div>

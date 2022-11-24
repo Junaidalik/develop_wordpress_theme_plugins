@@ -257,3 +257,87 @@ function add_Text_Field_column_content($content, $column_name, $term_id ){
 }
 
 /** add custom column to post type(property) */
+
+// call back function of ajax for php data
+
+
+add_action( 'wp_ajax_nopriv_my_action', 'my_action' );
+add_action( 'wp_ajax_my_action', 'my_action' );
+
+function my_action() { 
+    
+    $args = array(  
+        'post_type' => 'property',
+        'post_status' => 'publish',
+        'posts_per_page' => 3,
+        'offset' => 3 , 
+        'paged' => $paged,
+        'orderby' => 'title', 
+        'order' => 'ASC',
+        //'cat' => 'home',
+        's'=> $search_title,
+         'tax_query' => array(
+          'relation' => 'AND',
+          $property_type,
+          $property_currency,
+          $property_features,
+         
+        ),
+          'meta_query' => array(
+              $slider_range,
+           ),
+          
+      );
+      
+      $query = new WP_Query($args);
+
+      print_r($_POST['page_no']);
+
+    ?>
+                   <!-- properties -->
+                   <?php
+
+                    if($query->have_posts()){
+                       while($query->have_posts()){
+                       $query->the_post();
+                     
+                      $status_name = get_taxonomy_term(get_the_ID() ,'status');
+                      $curreny_name = get_taxonomy_term(get_the_ID() ,'currency');
+                      $feature_names = features_of_property(get_the_ID(),"features");
+
+                     
+                      ?>
+
+                    <div class="col-lg-4 col-sm-6">
+
+                
+                        <div class="properties">
+                            <div class="image-holder"><img src="<?php echo get_the_post_thumbnail_url()?>" class="img-responsive"
+                                    alt="properties">
+                                <div class="status sold"><?php  echo esc_html( $status_name);  ?></div>
+                            </div>
+                            <h4><a href="property-detail.php"><?php echo the_title(); ?></a></h4>
+                            <p class="price"><?php echo esc_html__('Price:','mytheme'); ?><?php echo  $curreny_name . get_post_meta( get_the_ID(), '_property_price', true); ?></p>
+                            <div class="listing-detail">
+                            <?php
+                            foreach( $feature_names as $feature_name ):
+                             $separator =explode('-',$feature_name->name);?>
+                           <span data-toggle="tooltip" data-placement="bottom" data-original-title="<?php echo esc_html( $separator[1] ) ?>"><?php echo esc_html( $separator[0]) ?></span>
+                            <?php endforeach; ?>
+                           
+                            </div>
+                            <a class="btn btn-primary" href=<?php echo esc_html( get_permalink()) ?>>View Details</a>
+                        </div>
+                    </div>
+                    <!-- properties -->
+                    
+                    <?php     
+                       }               
+                  wp_reset_postdata();
+                } 
+                else
+                { ?>
+                    <h1 style="color:black; margin:3em"><?php echo esc_html("post not found!!") ?></h1>;
+               <?php }
+	wp_die(); 
+}

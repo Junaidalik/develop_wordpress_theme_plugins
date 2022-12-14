@@ -143,43 +143,49 @@ class Elementor_My_Form_Widget extends \Elementor\Widget_Base {
 	protected function render() {
 
 		$settings = $this->get_settings_for_display();
+      $post_id = 0;
+      $title = '';
+      $content = '';
+        // print_r($_GET);
+        if(isset($_GET['post_id'])){
+            $post_id = $_GET['post_id'];
+            $title = get_the_title($post_id);
+            $content = get_the_content('','', $post_id);
 
-      
-       
+        };
         
-
 		?>
 <div style="border:2px solid black" class="container">
     <div style='padding:0.4em'>
         <div class="searchbar">
             <div class="col-sm-6 col-sm-6 ">
-                <div class="dropzone" name="dropzone" id="dropzone"> </div></div> </br></br>
-                <form id="control_form_id" name="form_data" class="dropzone" style="" method="POST" action="#">
-                        <input type="text" name="title" id="title" value="<?php ?>"
-                            placeholder="Enter the title"></br>
-                        <textarea name="description" id="description" value="<?php ?>" placeholder="Enter the description"></textarea></br></br>
+                <form id="control_form_id" name="form_data" style="" method="POST" action="<?php echo esc_url(get_permalink()) ?>">
+
+                <?php if(isset($_GET['post_id'])){ ?>
+                <input type='hidden' name = 'is_update' id = 'is_update' value='<?php echo esc_attr($_GET['post_id']) ?>' />
+                <?php }?>
+
+                <div id="event_dropzone" class="dropzone upload-ad-images event_zone"></div></br>
+
+                        <input type="text" name="title" id="title" value="<?php echo esc_attr($title)  ?>"placeholder="Enter the title"></br>
+                        <textarea name="description" id="description"  placeholder="Enter the description"><?php echo esc_attr($content) ?></textarea></br></br>
                         <div class="row">
                             <!-- Here is taxonomy [type] -->
                             <?php if($settings['show_type']=='yes') {?>
                             <div class="col-sm-4 col-sm-4 ">
                                 <select class="form-control" placeholder="property type" name="property_type">
                                     <?php 
-                                                $args  =  array(
-                                                    'taxonomy' => 'type',
-                                                    'hide_empty' => true,
-                                                );
-                                            $type_arr = get_terms( 
-                                                $args
-                                            );     
+                                                $args  =  array('taxonomy' => 'type', 'hide_empty' => false);
+                                                $type_arr = get_terms($args);    
 
-                                            // print_r($type_arr);
+                                                
+                                                $selected_type_term_ids = wp_get_post_terms($post_id, 'type',array( 'fields' => 'ids' ) );
+                                                $fetched_type_term_ids = implode($selected_type_term_ids);
+                                                
                                     ?>
-                                    <option
-                                        <?php echo esc_html(isset($_GET["property_type"]) ? '':'selected' ) ?>disabled>
-                                        type</option>
+                                    <option <?php echo esc_html(isset($_GET["property_type"]) ? '':'selected' ) ?>disabled>type</option>
                                     <?php foreach($type_arr as $type){ ?>
-                                    <option value="<?php echo esc_attr($type->term_id) ?>">
-                                        <?php echo esc_html($type->name) ?></option>
+                                    <option <?php echo ($fetched_type_term_ids==$type->term_id ? 'selected':''); ?> value="<?php echo esc_attr( $type->term_id) ?>"><?php echo esc_html($type->name) ?></option>
                                     <?php } ?>
                                 </select>
                             </div>
@@ -191,19 +197,21 @@ class Elementor_My_Form_Widget extends \Elementor\Widget_Base {
                                     <?php 
                                                 $args  =  array(
                                                     'taxonomy' => 'currency',
-                                                    'hide_empty' => true,
+                                                    'hide_empty' => false,
                                                 );
                                             $currency_arr = get_terms( 
                                                 $args
                                             );     
 
-                                            // print_r($currency_arr);
+                                            $selected_currency_term_ids = wp_get_post_terms($post_id, 'currency',array( 'fields' => 'ids' ) );
+                                            $fetched_currency_term_ids = implode($selected_currency_term_ids);
+                                            
                                     ?>
                                     <option
                                         <?php echo esc_html(isset($_GET["property_currency"]) ? '':'selected' ) ?>disabled>
                                         currency</option>
                                     <?php foreach($currency_arr as $currency){ ?>
-                                    <option value="<?php echo esc_attr($currency->term_id) ?>">
+                                    <option <?php echo ($fetched_currency_term_ids==$currency->term_id ? 'selected':''); ?>  value="<?php echo esc_attr($currency->term_id) ?>">
                                         <?php echo esc_html($currency->name) ?></option>
                                     <?php } ?>
                                 </select>
@@ -215,19 +223,21 @@ class Elementor_My_Form_Widget extends \Elementor\Widget_Base {
                                     <?php 
                                                 $args  =  array(
                                                     'taxonomy' => 'status',
-                                                    'hide_empty' => true,
+                                                    'hide_empty' => false,
                                                 );
                                             $status_arr = get_terms( 
                                                 $args
                                             );     
 
-                                            // print_r($currency_arr);
+                                            $selected_status_term_ids = wp_get_post_terms($post_id, 'status',array( 'fields' => 'ids' ) );
+                                            $fetched_status_term_ids = implode($selected_status_term_ids);
+
                                     ?>
                                     <option
                                         <?php echo esc_html(isset($_GET["property_status"]) ? '':'selected' ) ?>disabled>
                                         status</option>
                                     <?php foreach($status_arr as $status){ ?>
-                                    <option value="<?php echo esc_attr($status->term_id) ?>">
+                                    <option <?php echo ($fetched_status_term_ids==$status->term_id ? 'selected':''); ?> value="<?php echo esc_attr($status->term_id) ?>">
                                         <?php echo esc_html($status->name) ?></option>
                                     <?php } ?>
                                 </select>
@@ -238,19 +248,20 @@ class Elementor_My_Form_Widget extends \Elementor\Widget_Base {
                                     <?php 
                                                 $args  =  array(
                                                     'taxonomy' => 'location',
-                                                    'hide_empty' => true,
+                                                    'hide_empty' => false,
                                                 );
                                             $location_arr = get_terms( 
                                                 $args
                                             );     
 
-                                            // print_r($currency_arr);
+                                            $selected_location_term_ids = wp_get_post_terms($post_id, 'location',array( 'fields' => 'ids' ) );
+                                            $fetched_location_term_ids = implode($selected_location_term_ids);
                                     ?>
                                     <option
                                         <?php echo esc_html(isset($_GET["property_location"]) ? '':'selected' ) ?>disabled>
                                         location</option>
                                     <?php foreach($location_arr as $location){ ?>
-                                    <option value="<?php echo esc_attr($location->term_id) ?>">
+                                    <option  <?php echo ($fetched_location_term_ids==$location->term_id ? 'selected':''); ?> value="<?php echo esc_attr($location->term_id) ?>">
                                         <?php echo esc_html($location->name) ?></option>
                                     <?php } ?>
                                 </select>
@@ -258,7 +269,7 @@ class Elementor_My_Form_Widget extends \Elementor\Widget_Base {
                         </div> 
                         
                         <div>
-                            <input style="padding:1em" type="number" name="price" id="price" value="<?php //echo esc_attr($price); ?>" placeholder="Enter the price"></br>
+                            <input style="padding:1em" type="number" name="price" id="price" value="<?php echo esc_attr(get_post_meta( $post_id, '_property_price', true)); ?>" placeholder="Enter the price"></br>
                             <input style="padding:1em" type="text" name="address" id="address" value="<?php //echo esc_attr($address); ?>" placeholder="Enter the address"></br>
                         </div>
                                 <button style="max-width:10em" class="btn btn-success" type="submit" id="control_btn">submit</button>
@@ -272,5 +283,8 @@ class Elementor_My_Form_Widget extends \Elementor\Widget_Base {
 
                 </div>
 <?php  
+
 		}
+ 
+        
 }

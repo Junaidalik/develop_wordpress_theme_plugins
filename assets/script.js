@@ -40,7 +40,7 @@
 			return { init: init };
 		};
 
-		Page.init();
+		// Page.init();
 		
 
 		/**

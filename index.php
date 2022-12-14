@@ -38,7 +38,7 @@ $loop = new WP_Query( $args ); ?>
 </nav>
 
 </div></slider-wrapper -->
-</div> -->
+</div>
 
 <div class="banner-search">
     <div class="container">
@@ -48,31 +48,56 @@ $loop = new WP_Query( $args ); ?>
             <div class="row">
             <form id="form_id" method="GET" action="<?php echo home_url('/').'page-search' ?>">
                 <div class="col-lg-6 col-sm-6">
-                    <input type="text" name="searchpost" id="searchpost"  class="form-control" placeholder="Search of Properties">
+                    <input type="text" name="searchpost" id="searchpost" value="<?php echo (isset($_GET['searchpost']) ? $_GET['searchpost']:'') ?>" class="form-control" placeholder="Search of Properties">
                     <div class="row">
                         <div class="col-lg-3 col-sm-3 ">
-                            <select class="form-control">
-                                <option>Buy</option>
-                                <option>Rent</option>
-                                <option>Sale</option>
-                            </select>
+                        <select class="form-control" placeholder="property currency" name="property_currency">
+                                    <?php 
+                              $terms = get_terms( array(
+                                'taxonomy' => 'currency',
+                                'hide_empty' => false,
+                            ));?>
+                                    <option <?php echo esc_html(isset($_GET["property_currency"]) ? '':'selected' ) ?>
+                                        disabled>currency</option>
+                                    <?php foreach($terms as $term){ ?>
+                                    <option
+                                        <?php echo esc_attr(((isset($_GET['property_currency']) ? $_GET['property_currency']:'') == $term->slug)) ? 'selected':'' ?>
+                                        value="<?php echo esc_attr($term->slug) ?>"><?php echo esc_html($term->name) ?></option>
+                                    <?php } ?>
+                                </select>
                         </div>
                         <div class="col-lg-3 col-sm-4">
-                            <select class="form-control">
-                                <option>Price</option>
-                                <option>$150,000 - $200,000</option>
-                                <option>$200,000 - $250,000</option>
-                                <option>$250,000 - $300,000</option>
-                                <option>$300,000 - above</option>
-                            </select>
+                        <select class="form-control" placeholder="property features" name="property_features">
+                                    <?php 
+                              $terms = get_terms( array(
+                                'taxonomy' => 'features',
+                                'hide_empty' => false,
+                            ));?>
+                                    <option <?php echo esc_html(isset($_GET["property_features"]) ? '':'selected' ) ?>
+                                        disabled>features</option>
+                                    <?php foreach($terms as $term){ ?>
+                                    <option
+                                        <?php echo ((isset($_GET['property_features']) ? $_GET['property_features']:'') == $term->slug) ? 'selected':'' ?>
+                                        value="<?php echo $term->slug?>"><?php echo $term->name ?></option>
+                                    <?php } ?>
+                                </select>
                         </div>
                         <div class="col-lg-3 col-sm-4">
-                            <select class="form-control">
-                                <option>Property</option>
-                                <option>Apartment</option>
-                                <option>Building</option>
-                                <option>Office Space</option>
-                            </select>
+                        <select class="form-control" placeholder="property type" name="property_type">
+                                    <?php 
+                              $terms = get_terms( array(
+                                'taxonomy' => 'type',
+                                'hide_empty' => false,
+                              ));                              
+                            ?>
+                                    <option <?php echo esc_html(isset($_GET["property_type"]) ? '':'selected' ) ?>
+                                        disabled>type</option>
+                                    <?php foreach($terms as $term){ ?>
+                                    <option
+                                        <?php echo ((isset($_GET['property_type']) ? $_GET['property_type']:'') == $term->slug) ? 'selected':'' ?>
+                                        value="<?php echo $term->slug?>"><?php echo $term->name ?></option>
+                                    <?php } ?>
+                                </select>
                         </div>
                         <div class="col-lg-3 col-sm-4">
                             <button class="btn btn-success"  type="submit" id="butsave">Find
